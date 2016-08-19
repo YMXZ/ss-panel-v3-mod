@@ -9,6 +9,7 @@ use Psr\Http\Message\ResponseInterface;
 use App\Services\Factory;
 use App\Utils\Helper;
 use App\Models\Node;
+use App\Utils\Http;
 
 class Mu
 {
@@ -33,7 +34,7 @@ class Mu
 			}
 		}
 		
-		$node = Node::where("node_ip","=",$_SERVER["REMOTE_ADDR"])->first();
+		$node = Node::where("node_ip","=",Http::getClientIP())->first();
 		if($node==null)
 		{
 			$res['ret'] = 0;

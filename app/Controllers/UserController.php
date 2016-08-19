@@ -21,7 +21,7 @@ use App\Utils\GA;
 use App\Utils\Geetest;
 use App\Utils\Telegram;
 use App\Services\Mail;
-
+use App\Utils\Http;
 
 
 
@@ -794,15 +794,16 @@ class UserController extends BaseController
     {
 		$themes=Tools::getDir(BASE_PATH."/resources/views");
 		
-		$BIP = BlockIp::where("ip",$_SERVER["REMOTE_ADDR"])->first();
+		$ip = Http::getClientIP();
+		$BIP = BlockIp::where("ip",$ip)->first();
 		if($BIP == NULL)
 		{
-			$Block = "IP: ".$_SERVER["REMOTE_ADDR"]." 没有被封";
+			$Block = "IP: $ip 没有被封";
 			$isBlock = 0;
 		}
 		else
 		{
-			$Block = "IP: ".$_SERVER["REMOTE_ADDR"]." 已被封";
+			$Block = "IP: $ip 已被封";
 			$isBlock = 1;
 		}
 		
@@ -898,21 +899,22 @@ class UserController extends BaseController
 	public function Unblock($request, $response, $args)
     {
         $user = $this->user;
-		$BIP = BlockIp::where("ip",$_SERVER["REMOTE_ADDR"])->first();
+		$ip = Http::getClientIP();
+		$BIP = BlockIp::where("ip",$ip)->first();
         if ($BIP == NULL) {
             $res['ret'] = 0;
             $res['msg'] = "没有被封";
             return $response->getBody()->write(json_encode($res));
         }
 		
-		$BIP = BlockIp::where("ip",$_SERVER["REMOTE_ADDR"])->get();
+		$BIP = BlockIp::where("ip",$ip)->get();
 		foreach($BIP as $bi)
 		{
 			$bi->delete();
 		
 			$UIP = new UnblockIp();
 			$UIP->userid = $user->id;
-			$UIP->ip = $_SERVER["REMOTE_ADDR"];
+			$UIP->ip = $ip;
 			$UIP->datetime = time();
 			$UIP->save();
 		}
@@ -921,7 +923,7 @@ class UserController extends BaseController
 
 		
         $res['ret'] = 1;
-        $res['msg'] = "解封 ".$_SERVER["REMOTE_ADDR"]." 成功";
+        $res['msg'] = "解封 $ip 成功";
         return $this->echoJson($response, $res);
     }
 	
