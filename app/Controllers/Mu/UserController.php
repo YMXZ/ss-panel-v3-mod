@@ -7,13 +7,14 @@ use App\Models\TrafficLog;
 use App\Models\User;
 use App\Controllers\BaseController;
 use App\Utils\Tools;
+use App\Utils\Http;
 
 class UserController extends BaseController
 {
     // User List
     public function index($request, $response, $args)
     {
-		$node = Node::where("node_ip","=",$_SERVER["REMOTE_ADDR"])->where("sort","=","0")->first();
+		$node = Node::where("node_ip","=",Http::getClientIP())->where("sort","=","0")->first();
 		$node->node_heartbeat=time();
 		$node->save();
 		

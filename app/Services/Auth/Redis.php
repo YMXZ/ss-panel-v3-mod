@@ -8,6 +8,7 @@ use App\Services\RedisClient;
 use App\Utils\Tools;
 use App\Utils\Cookie;
 use App\Services\Config;
+use App\Utils\Http;
 
 class Redis extends Base
 {
@@ -30,7 +31,7 @@ class Redis extends Base
         ],$time+time());
         $value = $uid;
         $this->client->setex($sid,$time,$value);
-		$this->client->setex($sid."ip",$time,$_SERVER["REMOTE_ADDR"]);
+		$this->client->setex($sid."ip",$time,Http::getClientIP());
     }
 
     public  function logout(){
@@ -43,8 +44,9 @@ class Redis extends Base
         $value = $this->client->get($sid);
 		
 		$ip = $this->client->get($sid."ip");
-		$nodes=Node::where("node_ip","=",$_SERVER["REMOTE_ADDR"])->first();
-		if($ip != $_SERVER["REMOTE_ADDR"] && $nodes==null && Config::get('enable_login_bind_ip')=='true')
+        $clientip = Http::getClientIP();
+		$nodes=Node::where("node_ip","=",$clientip)->first();
+		if($ip != $clientip && $nodes==null && Config::get('enable_login_bind_ip')=='true')
 		{
 			$user = new User();
             $user->isLogin = false;
